@@ -37,8 +37,6 @@ body{
 
 /* HEADER */
 header{display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; margin-bottom:8px;}
-.brand-row{margin-bottom:12px;}
-.brand-logo{height:56px; width:auto; object-fit:contain; flex-shrink:0;}
 .eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--gold); margin-bottom:10px;}
 h1{font-family:var(--font-display); font-weight:600; font-size:38px; letter-spacing:-0.01em; line-height:1.05;}
 .subtitle{color:var(--text-dim); font-size:14px; margin-top:8px; max-width:560px; line-height:1.5;}
@@ -152,17 +150,6 @@ footer{margin-top:50px; text-align:center; font-size:11px; color:var(--text-fain
 }
 .upload-drop:hover{border-color:var(--gold-soft); color:var(--gold);}
 .loader-hint{color:var(--text-faint); font-size:11.5px; margin-top:22px; line-height:1.6;}
-
-.chart-tooltip{
-  position:fixed; pointer-events:none; z-index:50;
-  background:#0B1524; border:1px solid var(--line); border-radius:6px;
-  padding:7px 10px; font-family:var(--font-mono); font-size:12px; color:var(--text);
-  box-shadow:0 6px 18px rgba(0,0,0,0.35); opacity:0; transition:opacity 0.1s;
-  white-space:nowrap;
-}
-.chart-tooltip.visible{opacity:1;}
-.chart-tooltip .tt-label{color:var(--text-dim); margin-right:6px;}
-.chart-tooltip .tt-value{color:var(--gold); font-weight:600;}
 </style>
 </head>
 <body>
@@ -183,9 +170,6 @@ footer{margin-top:50px; text-align:center; font-size:11px; color:var(--text-fain
 
   <header>
     <div>
-      <div class="brand-row">
-        <img src="assets/kmc-logo-white.png" alt="INCEIF University Knowledge Management Centre" class="brand-logo">
-      </div>
       <div class="eyebrow">Publication Intelligence · Scopus</div>
       <h1>INCEIF Research Output</h1>
       <div class="subtitle">Every indexed publication, every author, tracked from first appearance to the present — filter the record by year or drill into any individual's output.</div>
@@ -289,7 +273,6 @@ footer{margin-top:50px; text-align:center; font-size:11px; color:var(--text-fain
 
   <footer>INCEIF RESEARCH OUTPUT DASHBOARD · GENERATED FROM SCOPUS EXPORT</footer>
   </div><!-- /dashboardRoot -->
-  <div id="chartTooltip" class="chart-tooltip"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>

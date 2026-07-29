@@ -305,6 +305,39 @@ function addTooltip(el, text){
   el.appendChild(title);
 }
 
+// Custom floating tooltip (instant, styled) used for chart hover interactions.
+const tooltipEl = document.getElementById('chartTooltip');
+function showChartTooltip(clientX, clientY, html){
+  if(!tooltipEl) return;
+  tooltipEl.innerHTML = html;
+  tooltipEl.classList.add('visible');
+  positionChartTooltip(clientX, clientY);
+}
+function positionChartTooltip(clientX, clientY){
+  if(!tooltipEl) return;
+  const pad = 14;
+  let x = clientX + pad, y = clientY + pad;
+  const rect = tooltipEl.getBoundingClientRect();
+  if(x + rect.width > window.innerWidth - 8) x = clientX - rect.width - pad;
+  if(y + rect.height > window.innerHeight - 8) y = clientY - rect.height - pad;
+  tooltipEl.style.left = x + 'px';
+  tooltipEl.style.top = y + 'px';
+}
+function hideChartTooltip(){
+  if(tooltipEl) tooltipEl.classList.remove('visible');
+}
+function wireHoverTooltip(el, htmlFn, dimAttr){
+  el.addEventListener('mousemove', (e) => showChartTooltip(e.clientX, e.clientY, htmlFn()));
+  el.addEventListener('mouseenter', (e) => {
+    showChartTooltip(e.clientX, e.clientY, htmlFn());
+    el.style.opacity = '0.82';
+  });
+  el.addEventListener('mouseleave', () => {
+    hideChartTooltip();
+    el.style.opacity = '1';
+  });
+}
+
 function renderDocTypeChart(){
   const list = pubsInRange(state.selYearMin, state.selYearMax);
   const counts = {};
@@ -332,7 +365,12 @@ function renderDocTypeChart(){
       const x2i = cx + rInner*Math.cos(angleStart), y2i = cy + rInner*Math.sin(angleStart);
       const d = `M ${x1o} ${y1o} A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2o} ${y2o} L ${x1i} ${y1i} A ${rInner} ${rInner} 0 ${largeArc} 0 ${x2i} ${y2i} Z`;
       const path = svgEl('path', {d, fill: DOC_COLORS[l]||DIM, stroke:'#152238', 'stroke-width':1.5});
-      addTooltip(path, `${l}: ${values[i]} (${Math.round(frac*100)}%)`);
+      path.style.cursor = 'default';
+      path.style.transition = 'opacity 0.1s';
+      wireHoverTooltip(path, () => `
+        <span class="tt-label">${l}</span><span class="tt-value">${fmt(values[i])}</span>
+        <span class="tt-label">(${Math.round(frac*100)}%)</span>
+      `);
       svg.appendChild(path);
       angleStart = angleEnd;
     });
