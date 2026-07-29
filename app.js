@@ -73,18 +73,21 @@ function renderRibbon(){
   const maxCount = Math.max(...counts);
   const W = svg.parentElement.clientWidth || 1260;
   const H = 90;
+  const topPad = 16; // room for the count label above the tallest bar
   svg.setAttribute('viewBox', `0 0 ${W} ${H+20}`);
   svg.innerHTML = '';
   const barW = W / years.length;
   const gap = Math.max(2, barW*0.18);
+  const labelFont = Math.max(7, Math.min(10, barW * 0.3));
 
   years.forEach((y, i) => {
-    const h = maxCount ? (counts[i]/maxCount) * H : 0;
+    const h = maxCount ? (counts[i]/maxCount) * (H - topPad) : 0;
     const x = i * barW;
     const inSel = y >= state.selYearMin && y <= state.selYearMax;
+    const barTop = H - h;
     const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
     rect.setAttribute('x', x + gap/2);
-    rect.setAttribute('y', H - h);
+    rect.setAttribute('y', barTop);
     rect.setAttribute('width', Math.max(1, barW - gap));
     rect.setAttribute('height', h);
     rect.setAttribute('rx', 1.5);
@@ -92,6 +95,16 @@ function renderRibbon(){
     rect.setAttribute('data-year', y);
     rect.style.transition = 'fill 0.15s';
     svg.appendChild(rect);
+
+    const countLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+    countLabel.setAttribute('x', x + barW/2);
+    countLabel.setAttribute('y', Math.max(labelFont, barTop - 4));
+    countLabel.setAttribute('text-anchor','middle');
+    countLabel.setAttribute('font-family','IBM Plex Mono, monospace');
+    countLabel.setAttribute('font-size', labelFont);
+    countLabel.setAttribute('fill', inSel ? '#EDEAE0' : '#5E6B8A');
+    countLabel.textContent = counts[i];
+    svg.appendChild(countLabel);
 
     if(y % 2 === 0 || years.length < 12){
       const label = document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -142,10 +155,10 @@ function renderRibbon(){
 
   document.getElementById('rangeLabel').textContent =
     (state.selYearMin === state.yearMin && state.selYearMax === state.yearMax)
-      ? `${state.yearMin}${state.yearMax} (full range)`
+      ? `${state.yearMin} - ${state.yearMax} (full range)`
       : (state.selYearMin === state.selYearMax)
         ? `${state.selYearMin} only`
-        : `${state.selYearMin}${state.selYearMax} selected`;
+        : `${state.selYearMin} - ${state.selYearMax} selected`;
 }
 
 // ---------- KPIs ----------
@@ -401,7 +414,7 @@ function renderAuthorDetail(){
   document.getElementById('dPubs').textContent = a.pubCount;
   document.getElementById('dCites').textContent = fmt(a.totalCites);
   const yrs = Object.keys(a.years).map(Number);
-  document.getElementById('dSpan').textContent = yrs.length ? `${Math.min(...yrs)}${Math.max(...yrs)}` : '';
+  document.getElementById('dSpan').textContent = yrs.length ? `${Math.min(...yrs)} - ${Math.max(...yrs)}` : '';
   document.getElementById('dAvg').textContent = a.pubCount ? (a.totalCites/a.pubCount).toFixed(1) : '0';
 
   const years = [];
