@@ -487,7 +487,7 @@ function renderAuthorDetail(){
   const years = [];
   for(let y=state.selYearMin; y<=state.selYearMax; y++) years.push(y);
   const values = years.map(y => a.years[y] || 0);
-  renderBarChartSVG('authorYearChart', years, values, GOLD, ' publication(s)');
+  renderBarChartSVG('authorYearChart', years, values, GOLD, ' publication(s)', true);
 }
 
 // ---------- Table ----------
