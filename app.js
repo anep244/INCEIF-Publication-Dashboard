@@ -20,15 +20,28 @@ function newState(){
   };
 }
 
-const GOLD = '#C9A961', TEAL = '#4FA8A0', ROSE = '#C97064', BLUE = '#6E8FCF', PLUM='#9B7EDE', DIM='#5E6B8A';
+const GOLD = '#c79a3c', GOLD_DK = '#a9791f', TEAL = '#0f5c52', ROSE = '#8a3b2b', NAVY = '#0e2c4c', NAVY_LT = '#20507f', PLUM='#5c5346', DIM='#7c8b98';
+const LINE = '#dfd6bf';
+const INK_900 = '#111a24', INK_600 = '#4a5a68', INK_400 = '#7c8b98';
 const DOC_COLORS = {
-  'Article': GOLD, 'Book chapter': TEAL, 'Editorial': ROSE, 'Book': BLUE,
-  'Review': PLUM, 'Conference paper': '#7FBF7F', 'Note': '#C77DFF', 'Erratum': DIM, 'Unknown': DIM
+  'Article': GOLD, 'Book chapter': TEAL, 'Editorial': ROSE, 'Book': NAVY_LT,
+  'Review': PLUM, 'Conference paper': '#187a6d', 'Note': GOLD_DK, 'Erratum': DIM, 'Unknown': DIM
 };
 
 // ---------- Helpers ----------
 function pubsInRange(minY, maxY){
   return DATA.publications.filter(p => p.year >= minY && p.year <= maxY);
+}
+
+// Same as pubsInRange, but also narrowed to the selected author (if any) —
+// used by the Composition and Citations-per-Year charts so they reflect
+// whichever author is currently selected in the Authors list.
+function pubsForCharts(){
+  let list = pubsInRange(state.selYearMin, state.selYearMax);
+  if(state.selectedAuthorId){
+    list = list.filter(p => p.authors.some(a => a.id === state.selectedAuthorId));
+  }
+  return list;
 }
 
 function filteredPubs(){
@@ -91,7 +104,7 @@ function renderRibbon(){
     rect.setAttribute('width', Math.max(1, barW - gap));
     rect.setAttribute('height', h);
     rect.setAttribute('rx', 1.5);
-    rect.setAttribute('fill', inSel ? GOLD : '#2A3B5C');
+    rect.setAttribute('fill', inSel ? GOLD : LINE);
     rect.setAttribute('data-year', y);
     rect.style.transition = 'fill 0.15s';
     svg.appendChild(rect);
@@ -102,7 +115,7 @@ function renderRibbon(){
     countLabel.setAttribute('text-anchor','middle');
     countLabel.setAttribute('font-family','IBM Plex Mono, monospace');
     countLabel.setAttribute('font-size', labelFont);
-    countLabel.setAttribute('fill', inSel ? '#EDEAE0' : '#5E6B8A');
+    countLabel.setAttribute('fill', inSel ? GOLD_DK : INK_400);
     countLabel.textContent = counts[i];
     svg.appendChild(countLabel);
 
@@ -113,7 +126,7 @@ function renderRibbon(){
       label.setAttribute('text-anchor','middle');
       label.setAttribute('font-family','IBM Plex Mono, monospace');
       label.setAttribute('font-size','10');
-      label.setAttribute('fill', inSel ? '#9CA8C2' : '#5E6B8A');
+      label.setAttribute('fill', inSel ? INK_600 : INK_400);
       label.textContent = "'" + String(y).slice(2);
       svg.appendChild(label);
     }
@@ -339,7 +352,14 @@ function wireHoverTooltip(el, htmlFn, dimAttr){
 }
 
 function renderDocTypeChart(){
-  const list = pubsInRange(state.selYearMin, state.selYearMax);
+  const list = pubsForCharts();
+  const subEl = document.getElementById('compSub');
+  if(subEl){
+    const authorName = state.selectedAuthorId ? (authorsInRange().find(a=>a.id===state.selectedAuthorId)||{}).name : null;
+    subEl.textContent = authorName
+      ? `Document types & access for ${authorName}`
+      : 'Document types & access within selected range';
+  }
   const counts = {};
   list.forEach(p => counts[p.docType] = (counts[p.docType]||0)+1);
   const labels = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
@@ -352,7 +372,7 @@ function renderDocTypeChart(){
 
   const cx = 95, cy = 95, rOuter = 85, rInner = 53;
   if(total === 0){
-    svg.appendChild(svgEl('circle', {cx, cy, r: rOuter, fill:'none', stroke:'#2A3B5C', 'stroke-width': rOuter-rInner}));
+    svg.appendChild(svgEl('circle', {cx, cy, r: rOuter, fill:'none', stroke:LINE, 'stroke-width': rOuter-rInner}));
   } else {
     let angleStart = -Math.PI/2;
     labels.forEach((l, i) => {
@@ -364,7 +384,7 @@ function renderDocTypeChart(){
       const x1i = cx + rInner*Math.cos(angleEnd), y1i = cy + rInner*Math.sin(angleEnd);
       const x2i = cx + rInner*Math.cos(angleStart), y2i = cy + rInner*Math.sin(angleStart);
       const d = `M ${x1o} ${y1o} A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2o} ${y2o} L ${x1i} ${y1i} A ${rInner} ${rInner} 0 ${largeArc} 0 ${x2i} ${y2i} Z`;
-      const path = svgEl('path', {d, fill: DOC_COLORS[l]||DIM, stroke:'#152238', 'stroke-width':1.5});
+      const path = svgEl('path', {d, fill: DOC_COLORS[l]||DIM, stroke:'#ffffff', 'stroke-width':2});
       path.style.cursor = 'default';
       path.style.transition = 'opacity 0.1s';
       wireHoverTooltip(path, () => `
@@ -375,10 +395,10 @@ function renderDocTypeChart(){
       angleStart = angleEnd;
     });
   }
-  const centerNum = svgEl('text', {x:cx, y:cy-4, 'text-anchor':'middle', 'font-family':'IBM Plex Mono, monospace', 'font-size':'20', 'font-weight':'600', fill:'#EDEAE0'});
+  const centerNum = svgEl('text', {x:cx, y:cy-4, 'text-anchor':'middle', 'font-family':'Fraunces, serif', 'font-size':'22', 'font-weight':'600', fill:INK_900});
   centerNum.textContent = total;
   svg.appendChild(centerNum);
-  const centerLbl = svgEl('text', {x:cx, y:cy+14, 'text-anchor':'middle', 'font-family':'IBM Plex Mono, monospace', 'font-size':'9', fill:'#9CA8C2'});
+  const centerLbl = svgEl('text', {x:cx, y:cy+14, 'text-anchor':'middle', 'font-family':'IBM Plex Mono, monospace', 'font-size':'9', fill:INK_400});
   centerLbl.textContent = 'PAPERS';
   svg.appendChild(centerLbl);
 
@@ -416,7 +436,7 @@ function renderBarChartSVG(svgId, years, values, color, tooltipSuffix, showValue
     if(showValues){
       const valLabel = svgEl('text', {
         x: x + barW/2, y: Math.max(fontSize, barTop - 4), 'text-anchor':'middle',
-        'font-family':'IBM Plex Mono, monospace', 'font-size': fontSize, fill: '#EDEAE0'
+        'font-family':'IBM Plex Mono, monospace', 'font-size': fontSize, fill: INK_900
       });
       valLabel.textContent = fmt(v);
       svg.appendChild(valLabel);
@@ -425,7 +445,7 @@ function renderBarChartSVG(svgId, years, values, color, tooltipSuffix, showValue
     if(years.length <= 20 || y % 2 === 0){
       const label = svgEl('text', {
         x: x + barW/2, y: H - 4, 'text-anchor':'middle',
-        'font-family':'IBM Plex Mono, monospace', 'font-size':'9', fill:'#5E6B8A'
+        'font-family':'IBM Plex Mono, monospace', 'font-size':'9', fill:INK_400
       });
       label.textContent = "'" + String(y).slice(2);
       svg.appendChild(label);
@@ -436,8 +456,17 @@ function renderBarChartSVG(svgId, years, values, color, tooltipSuffix, showValue
 function renderCiteChart(){
   const years = [];
   for(let y=state.selYearMin; y<=state.selYearMax; y++) years.push(y);
-  const values = years.map(y => DATA.publications.filter(p=>p.year===y).reduce((s,p)=>s+p.citedBy,0));
+  const list = pubsForCharts();
+  const values = years.map(y => list.filter(p=>p.year===y).reduce((s,p)=>s+p.citedBy,0));
   renderBarChartSVG('citeChart', years, values, TEAL, ' citations', true);
+
+  const subEl = document.getElementById('citeSub');
+  if(subEl){
+    const authorName = state.selectedAuthorId ? (authorsInRange().find(a=>a.id===state.selectedAuthorId)||{}).name : null;
+    subEl.textContent = authorName
+      ? `Citations accrued by ${authorName}'s papers, by publication year`
+      : 'Total citations accrued by papers published each year';
+  }
 }
 
 function renderAuthorDetail(){
