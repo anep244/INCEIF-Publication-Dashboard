@@ -20,12 +20,12 @@ function newState(){
   };
 }
 
-const GOLD = '#c79a3c', GOLD_DK = '#a9791f', TEAL = '#0f5c52', ROSE = '#8a3b2b', NAVY = '#0e2c4c', NAVY_LT = '#20507f', PLUM='#5c5346', DIM='#7c8b98';
-const LINE = '#dfd6bf';
-const INK_900 = '#111a24', INK_600 = '#4a5a68', INK_400 = '#7c8b98';
+const GOLD = '#c79a3c', GOLD_DK = '#e0b25c', TEAL = '#2bb3a0', ROSE = '#d4694a', NAVY = '#0e2c4c', NAVY_LT = '#6f9bc9', PLUM='#a68fd1', DIM='#8494a8';
+const LINE = '#2c4a6e';
+const INK_900 = '#f4efe3', INK_600 = '#c7d2de', INK_400 = '#93a4b8';
 const DOC_COLORS = {
   'Article': GOLD, 'Book chapter': TEAL, 'Editorial': ROSE, 'Book': NAVY_LT,
-  'Review': PLUM, 'Conference paper': '#187a6d', 'Note': GOLD_DK, 'Erratum': DIM, 'Unknown': DIM
+  'Review': PLUM, 'Conference paper': '#7fbf8a', 'Note': GOLD_DK, 'Erratum': DIM, 'Unknown': DIM
 };
 
 // ---------- Helpers ----------
@@ -384,7 +384,7 @@ function renderDocTypeChart(){
       const x1i = cx + rInner*Math.cos(angleEnd), y1i = cy + rInner*Math.sin(angleEnd);
       const x2i = cx + rInner*Math.cos(angleStart), y2i = cy + rInner*Math.sin(angleStart);
       const d = `M ${x1o} ${y1o} A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2o} ${y2o} L ${x1i} ${y1i} A ${rInner} ${rInner} 0 ${largeArc} 0 ${x2i} ${y2i} Z`;
-      const path = svgEl('path', {d, fill: DOC_COLORS[l]||DIM, stroke:'#ffffff', 'stroke-width':2});
+      const path = svgEl('path', {d, fill: DOC_COLORS[l]||DIM, stroke:'#0e2c4c', 'stroke-width':2});
       path.style.cursor = 'default';
       path.style.transition = 'opacity 0.1s';
       wireHoverTooltip(path, () => `
